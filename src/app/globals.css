@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-navy: #142D4E;
+  --color-brand-navy-light: #1D3F6C;
+  --color-brand-navy-dark: #0D1E35;
+  --color-brand-blue: #2563EB;
+  --color-brand-blue-hover: #1D4ED8;
+  --color-brand-blue-subtle: #EFF6FF;
+  --color-brand-bg: #F5F7FA;
+  --color-brand-card: #FFFFFF;
+  --color-brand-success: #16805D;
+  --color-brand-success-subtle: #ECFDF5;
+  --color-brand-warning: #B45309;
+  --color-brand-warning-subtle: #FFFBEB;
+  --color-brand-danger: #B91C1C;
+  --color-brand-danger-subtle: #FEF2F2;
+
+  --color-border-subtle: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
+}
+
+:root {
+  --background: #F5F7FA;
+  --foreground: #0F172A;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Restrained focus ring */
+*:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for clean horizontal filter chips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
