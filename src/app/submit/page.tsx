@@ -42,14 +42,31 @@ export default function SubmitHackathonPage() {
     submitterRole: "student_lead",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate server action submission
-    setTimeout(() => {
+    setSubmitError(null);
+
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setSubmitError(data.error || "Failed to submit event. Please check required fields.");
+      } else {
+        setSubmitted(true);
+      }
+    } catch (err: any) {
+      setSubmitError(err.message || "Network error. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      setSubmitted(true);
-    }, 800);
+    }
   };
 
   return (
@@ -368,6 +385,13 @@ export default function SubmitHackathonPage() {
               </div>
             </div>
           </div>
+
+          {submitError && (
+            <div className="p-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-md text-xs font-semibold text-[#B91C1C] flex items-center gap-2">
+              <Info className="w-4 h-4 text-[#B91C1C] shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           {/* Submit Actions */}
           <div className="flex items-center justify-end gap-3 pt-4">
