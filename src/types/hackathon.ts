@@ -65,3 +65,13 @@ export interface DistrictSummary {
   auditFrequencyHours: number;
   keyColleges: string[];
 }
+
+export interface HackathonFilters {
+  search?: string;
+  districtId?: string;
+  registrationStatus?: string;
+  deadlineRange?: string; // '7_days' | '14_days' | '30_days' | 'all'
+  format?: string; // 'in_person' | 'hybrid' | 'online' | 'all'
+  cluster?: string;
+  onlyFree?: boolean;
+}
