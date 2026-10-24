@@ -13,7 +13,7 @@ type DiscoveryRunInsert = Database["public"]["Tables"]["discovery_runs"]["Insert
 /**
  * Maps a database row to the frontend Hackathon model
  */
-function mapRowToHackathon(row: HackathonRow): Hackathon {
+export function mapRowToHackathon(row: HackathonRow): Hackathon {
   const now = new Date();
   const deadline = new Date(row.registration_deadline);
   const diffTime = deadline.getTime() - now.getTime();
@@ -55,13 +55,23 @@ function mapRowToHackathon(row: HackathonRow): Hackathon {
     prizePoolInr: row.prize_pool_inr,
     isFree: row.is_free,
     feeAmount: row.fee_amount_text || undefined,
+    registrationFeeInr: row.registration_fee_inr,
     teamSize: `${row.team_size_min} - ${row.team_size_max} Members`,
-    themeTags: row.theme_tags,
+    teamSizeMin: row.team_size_min,
+    teamSizeMax: row.team_size_max,
+    eligibility: row.eligibility,
+    technologyDomains: row.technology_domains || [],
+    themeTags: row.theme_tags || [],
     officialWebsiteUrl: row.official_website_url,
     registrationUrl: row.registration_url,
     sourcePlatform: "Verified Source",
     sourceProofUrl: row.source_proof_url || row.official_website_url,
-    registrationStatus: row.current_status === "archived" ? "closed" : row.current_status,
+    registrationStatus: row.current_status,
+    verificationStatus: row.verification_status,
+    isDateOnlyDeadline: row.is_date_only_deadline,
+    registrationDeadlineRaw: row.registration_deadline_raw || undefined,
+    verificationNotes: row.verification_notes || undefined,
+    nextVerificationDueAt: row.next_verification_due_at || undefined,
     verifiedAt: new Date(row.last_verified_at).toLocaleDateString("en-IN", {
       month: "short",
       day: "numeric",

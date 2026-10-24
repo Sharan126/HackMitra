@@ -28,7 +28,17 @@ export type OrganizerType =
 
 export type ParticipationFormat = "in_person" | "hybrid" | "online";
 
-export type CurrentStatus = "open" | "closing_soon" | "closed" | "upcoming" | "archived";
+export type CurrentStatus =
+  | "open"
+  | "deadline_today"
+  | "closing_soon"
+  | "upcoming"
+  | "ongoing"
+  | "closed"
+  | "completed"
+  | "cancelled"
+  | "unverified"
+  | "stale";
 
 export type VerificationStatus = "verified" | "pending_verification" | "rejected";
 
@@ -50,7 +60,12 @@ export type VerificationCheckType =
   | "dates_consistency"
   | "circular_proof_check"
   | "organizer_verification"
-  | "manual_audit";
+  | "manual_audit"
+  | "deadline_recheck"
+  | "cancellation_check"
+  | "postponement_check"
+  | "extension_detected"
+  | "stale_detection";
 
 export interface Database {
   public: {
@@ -220,6 +235,10 @@ export interface Database {
           theme_tags: string[];
           current_status: CurrentStatus;
           verification_status: VerificationStatus;
+          is_date_only_deadline: boolean;
+          registration_deadline_raw: string | null;
+          next_verification_due_at: string | null;
+          verification_notes: string | null;
           last_verified_at: string;
           source_proof_url: string | null;
           rounds: Json;
@@ -244,6 +263,10 @@ export interface Database {
           official_website_url: string;
           registration_url: string;
           registration_deadline: string;
+          is_date_only_deadline?: boolean;
+          registration_deadline_raw?: string | null;
+          next_verification_due_at?: string | null;
+          verification_notes?: string | null;
           start_date: string;
           end_date: string;
           eligibility?: string;
@@ -282,6 +305,10 @@ export interface Database {
           official_website_url?: string;
           registration_url?: string;
           registration_deadline?: string;
+          is_date_only_deadline?: boolean;
+          registration_deadline_raw?: string | null;
+          next_verification_due_at?: string | null;
+          verification_notes?: string | null;
           start_date?: string;
           end_date?: string;
           eligibility?: string;
@@ -424,34 +451,40 @@ export interface Database {
       user_preferences: {
         Row: {
           user_id: string;
+          email: string | null;
           home_district_id: string | null;
           preferred_districts: string[];
           preferred_themes: string[];
           notify_email: boolean;
           notify_deadline_reminders: boolean;
           notify_new_in_district: boolean;
+          notify_status_changes: boolean;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           user_id: string;
+          email?: string | null;
           home_district_id?: string | null;
           preferred_districts?: string[];
           preferred_themes?: string[];
           notify_email?: boolean;
           notify_deadline_reminders?: boolean;
           notify_new_in_district?: boolean;
+          notify_status_changes?: boolean;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           user_id?: string;
+          email?: string | null;
           home_district_id?: string | null;
           preferred_districts?: string[];
           preferred_themes?: string[];
           notify_email?: boolean;
           notify_deadline_reminders?: boolean;
           notify_new_in_district?: boolean;
+          notify_status_changes?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -484,6 +517,96 @@ export interface Database {
         };
         Relationships: [];
       };
+      notification_delivery_logs: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          recipient_email: string;
+          notification_type: NotificationType;
+          hackathon_id: string | null;
+          dedup_key: string;
+          subject: string;
+          body_preview: string | null;
+          provider: string;
+          status: DeliveryStatus;
+          error_message: string | null;
+          metadata: Json;
+          sent_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          recipient_email: string;
+          notification_type: NotificationType;
+          hackathon_id?: string | null;
+          dedup_key: string;
+          subject: string;
+          body_preview?: string | null;
+          provider?: string;
+          status: DeliveryStatus;
+          error_message?: string | null;
+          metadata?: Json;
+          sent_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          recipient_email?: string;
+          notification_type?: NotificationType;
+          hackathon_id?: string | null;
+          dedup_key?: string;
+          subject?: string;
+          body_preview?: string | null;
+          provider?: string;
+          status?: DeliveryStatus;
+          error_message?: string | null;
+          metadata?: Json;
+          sent_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      scheduled_reminders: {
+        Row: {
+          id: string;
+          user_id: string;
+          hackathon_id: string;
+          reminder_type: ReminderType;
+          target_deadline: string;
+          scheduled_for: string;
+          status: ReminderStatus;
+          last_processed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          hackathon_id: string;
+          reminder_type: ReminderType;
+          target_deadline: string;
+          scheduled_for: string;
+          status?: ReminderStatus;
+          last_processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          hackathon_id?: string;
+          reminder_type?: ReminderType;
+          target_deadline?: string;
+          scheduled_for?: string;
+          status?: ReminderStatus;
+          last_processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -503,3 +626,13 @@ export interface Database {
     };
   };
 }
+
+export type NotificationType =
+  | "new_matching_event"
+  | "deadline_reminder"
+  | "status_or_deadline_change"
+  | "test_notification";
+
+export type DeliveryStatus = "delivered" | "failed" | "cancelled" | "skipped_opt_out";
+export type ReminderType = "24h_before_deadline" | "48h_before_deadline" | "deadline_today";
+export type ReminderStatus = "pending" | "sent" | "cancelled" | "stale";

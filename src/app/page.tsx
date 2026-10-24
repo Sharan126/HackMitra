@@ -9,16 +9,16 @@ import {
   getRegistrationOpenHackathons,
   getRecentlyDiscoveredHackathons,
   filterHackathons,
-} from "@/lib/services/hackathons";
-import { KARNATAKA_DISTRICTS } from "@/lib/karnataka-data";
-import { HackathonCard } from "@/components/ui/HackathonCard";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Button } from "@/components/ui/Button";
-import { StatusLabel } from "@/components/ui/StatusLabel";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { LoadingState } from "@/components/ui/LoadingState";
-import { ErrorState } from "@/components/ui/ErrorState";
+} from "../lib/services/hackathons";
+import { KARNATAKA_DISTRICTS, District } from "../lib/karnataka-data";
+import { HackathonCard } from "../components/ui/HackathonCard";
+import { Input } from "../components/ui/Input";
+import { Select } from "../components/ui/Select";
+import { Button } from "../components/ui/Button";
+import { StatusLabel } from "../components/ui/StatusLabel";
+import { EmptyState } from "../components/ui/EmptyState";
+import { LoadingState } from "../components/ui/LoadingState";
+import { ErrorState } from "../components/ui/ErrorState";
 import {
   Search,
   MapPin,
@@ -360,16 +360,22 @@ export default function HomePage() {
               </div>
 
               {/* Registration Status Filter */}
-              <div className="w-40">
+              <div className="w-44">
                 <Select
                   value={registrationStatus}
                   onChange={(e) => setRegistrationStatus(e.target.value)}
                 >
                   <option value="all">All Statuses</option>
                   <option value="open">Registration Open</option>
+                  <option value="deadline_today">Deadline Today</option>
                   <option value="closing_soon">Closing Soon</option>
                   <option value="upcoming">Upcoming</option>
-                  <option value="closed">Closed</option>
+                  <option value="ongoing">Ongoing Event</option>
+                  <option value="closed">Registration Closed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="unverified">Unverified Source</option>
+                  <option value="stale">Needs Reverification</option>
                 </Select>
               </div>
 
@@ -433,8 +439,14 @@ export default function HomePage() {
                   >
                     <option value="all">All</option>
                     <option value="open">Open</option>
-                    <option value="closing_soon">Closing</option>
+                    <option value="deadline_today">Deadline Today</option>
+                    <option value="closing_soon">Closing Soon</option>
                     <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="closed">Closed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="unverified">Unverified</option>
+                    <option value="stale">Stale</option>
                   </Select>
                 </div>
 

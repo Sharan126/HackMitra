@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { StatusLabel } from "@/components/ui/StatusLabel";
-import { KARNATAKA_DISTRICTS } from "@/lib/karnataka-data";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
+import { StatusLabel } from "../../components/ui/StatusLabel";
+import { KARNATAKA_DISTRICTS } from "../../lib/karnataka-data";
 import {
   ShieldCheck,
   ArrowLeft,

@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { SearchX, PlusCircle, RotateCcw } from "lucide-react";
 import { Button } from "./Button";
 

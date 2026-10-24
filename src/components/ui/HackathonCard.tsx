@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { StatusLabel } from "./StatusLabel";
-import { Hackathon } from "@/types/hackathon";
+import { SaveEventButton } from "../hackathons/SaveEventButton";
+import { Hackathon } from "../../types/hackathon";
 import {
   Calendar,
   MapPin,
@@ -28,21 +29,6 @@ export function HackathonCard({ hackathon, className, compact = false }: Hackath
     hybrid: "hybrid",
     online: "online",
   } as const;
-
-  // Map registration status
-  const regStatusMap = {
-    open: "reg_open",
-    closing_soon: "reg_closing",
-    closed: "reg_closed",
-    upcoming: "under_review",
-  } as const;
-
-  const regStatusTextMap = {
-    open: "Registration Open",
-    closing_soon: "Closing Soon",
-    closed: "Registration Closed",
-    upcoming: "Upcoming",
-  };
 
   return (
     <article
@@ -76,10 +62,10 @@ export function HackathonCard({ hackathon, className, compact = false }: Hackath
 
         <div className="flex items-center gap-1.5">
           <StatusLabel
-            type={regStatusMap[hackathon.registrationStatus]}
-            customText={regStatusTextMap[hackathon.registrationStatus]}
+            type={hackathon.registrationStatus}
             size="xs"
           />
+          <SaveEventButton hackathonId={hackathon.id} size="icon" className="h-6 w-6 p-0" />
         </div>
       </div>
 
@@ -126,12 +112,21 @@ export function HackathonCard({ hackathon, className, compact = false }: Hackath
 
           <div className="flex items-center gap-2 text-[#475569]">
             <Clock className="w-4 h-4 text-[#B45309] shrink-0" />
-            <div>
-              <p className="text-[10px] uppercase font-semibold text-[#64748B] tracking-wider">
-                Apply Deadline
-              </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] uppercase font-semibold text-[#64748B] tracking-wider">
+                  Apply Deadline
+                </p>
+                {hackathon.isDateOnlyDeadline && (
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-[#F1F5F9] text-[#64748B] font-normal">
+                    IST Day
+                  </span>
+                )}
+              </div>
               <p className="font-semibold text-[#0F172A] truncate">
-                {hackathon.registrationDeadline}
+                {hackathon.registrationStatus === "deadline_today"
+                  ? (hackathon.isDateOnlyDeadline ? "Closes Today (IST)" : hackathon.registrationDeadline)
+                  : hackathon.registrationDeadline}
               </p>
             </div>
           </div>
@@ -167,13 +162,29 @@ export function HackathonCard({ hackathon, className, compact = false }: Hackath
         <div className="mt-auto pt-3 border-t border-[#F8FAFC] flex flex-wrap items-center justify-between text-[11px] text-[#64748B] gap-2">
           <div className="flex items-center gap-1.5 text-[#16805D]">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span className="font-medium">Verified by Moderator</span>
+            <span className="font-medium">
+              {hackathon.registrationStatus === "unverified"
+                ? "Unverified Source"
+                : hackathon.registrationStatus === "stale"
+                ? "Needs Reverification"
+                : "Verified"}
+            </span>
             <span className="text-[#94A3B8]">({hackathon.verifiedAt})</span>
           </div>
 
-          <span className="text-[11px] text-[#64748B]">
-            Source: <span className="font-medium text-[#475569]">{hackathon.sourcePlatform}</span>
-          </span>
+          <div className="flex items-center gap-1 text-[11px] text-[#64748B]">
+            <span>Source:</span>
+            <a
+              href={hackathon.sourceProofUrl || hackathon.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-[#2563EB] hover:underline flex items-center gap-0.5 truncate max-w-[150px]"
+              title={`Inspect source proof: ${hackathon.sourcePlatform}`}
+            >
+              <span>{hackathon.sourcePlatform}</span>
+              <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+            </a>
+          </div>
         </div>
       </div>
 

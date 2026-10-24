@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { Button } from "../ui/Button";
 import {
   Compass,
@@ -17,16 +17,21 @@ import {
   Layers,
   Sparkles,
   User,
+  Bookmark,
 } from "lucide-react";
+import { useAuth } from "../../lib/auth/auth-context";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, openAuthModal } = useAuth();
 
   const navLinks = [
     { label: "Hackathons", href: "/hackathons", icon: Layers },
     { label: "Districts", href: "/districts", icon: MapPin },
     { label: "Sources", href: "/sources", icon: FileCheck2 },
+    { label: "Moderation", href: "/admin", icon: ShieldCheck },
+    ...(user ? [{ label: "My Radar", href: "/profile", icon: Bookmark }] : []),
   ];
 
   return (
@@ -103,6 +108,27 @@ export function Header() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2.5">
+          {user ? (
+            <Link href="/profile">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Bookmark className="w-3.5 h-3.5 text-[#2563EB]" />}
+              >
+                My Radar
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openAuthModal}
+              leftIcon={<User className="w-3.5 h-3.5 text-[#64748B]" />}
+            >
+              Sign In
+            </Button>
+          )}
+
           <Link href="/submit">
             <Button
               variant="primary"

@@ -1,9 +1,9 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { KARNATAKA_DISTRICTS } from "@/lib/karnataka-data";
-import { getDistrictBySlug, getAllDistrictSummaries } from "@/lib/services/districts";
-import { DistrictDetailView } from "@/components/discovery/DistrictDetailView";
+import { KARNATAKA_DISTRICTS } from "../../../lib/karnataka-data";
+import { getDistrictBySlug, getAllDistrictSummaries } from "../../../lib/services/districts";
+import { DistrictDetailView } from "../../../components/discovery/DistrictDetailView";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

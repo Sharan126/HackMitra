@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { District } from "@/lib/karnataka-data";
-import { Hackathon } from "@/types/hackathon";
-import { HackathonCard } from "@/components/ui/HackathonCard";
+import { District } from "../../lib/karnataka-data";
+import { Hackathon } from "../../types/hackathon";
+import { HackathonCard } from "../ui/HackathonCard";
 import {
   MapPin,
   ArrowLeft,

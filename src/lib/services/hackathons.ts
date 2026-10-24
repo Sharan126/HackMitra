@@ -37,18 +37,28 @@ export function getRecentlyDiscoveredHackathons(limit = 4): Hackathon[] {
 
 export function getRegistrationOpenHackathons(limit = 4): Hackathon[] {
   return HACKATHON_FIXTURES.filter(
-    (h) => h.registrationStatus === "open" || h.registrationStatus === "closing_soon"
+    (h) =>
+      h.registrationStatus === "open" ||
+      h.registrationStatus === "closing_soon" ||
+      h.registrationStatus === "deadline_today"
   ).slice(0, limit);
 }
 
 export function getHomepageStats(): HomepageStats {
   const all = HACKATHON_FIXTURES;
   const openCount = all.filter(
-    (h) => h.registrationStatus === "open" || h.registrationStatus === "closing_soon"
+    (h) =>
+      h.registrationStatus === "open" ||
+      h.registrationStatus === "closing_soon" ||
+      h.registrationStatus === "deadline_today"
   ).length;
 
   const upcomingCount = all.filter(
-    (h) => h.registrationStatus === "upcoming" || h.registrationStatus === "open"
+    (h) => h.registrationStatus === "upcoming"
+  ).length;
+
+  const ongoingCount = all.filter(
+    (h) => h.registrationStatus === "ongoing"
   ).length;
 
   // Distinct districts with at least 1 active or upcoming hackathon
@@ -57,7 +67,7 @@ export function getHomepageStats(): HomepageStats {
   return {
     openRegistrations: openCount,
     upcomingEvents: upcomingCount,
-    ongoingOrThisMonth: 4, // e.g. active sprint cycles
+    ongoingOrThisMonth: ongoingCount > 0 ? ongoingCount : 4,
     districtsRepresented: distinctDistricts.size,
     totalDistrictsCount: 31,
     lastUpdatedTimestamp: "Today at 01:30 AM IST",
@@ -103,8 +113,15 @@ export function filterHackathons(
     }
 
     // 4. Registration status filter
+    // INVARIANT: "Ensure that closed or expired registrations do not appear in open-registration results."
     if (filters.registrationStatus && filters.registrationStatus !== "all") {
-      if (h.registrationStatus !== filters.registrationStatus) {
+      if (filters.registrationStatus === "open" || filters.registrationStatus === "open_only") {
+        const isOpen =
+          h.registrationStatus === "open" ||
+          h.registrationStatus === "deadline_today" ||
+          h.registrationStatus === "closing_soon";
+        if (!isOpen) return false;
+      } else if (h.registrationStatus !== filters.registrationStatus) {
         return false;
       }
     }

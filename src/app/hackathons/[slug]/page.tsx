@@ -1,9 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getHackathonBySlug, getAllHackathons } from "@/lib/services/hackathons";
-import { Button } from "@/components/ui/Button";
-import { StatusLabel } from "@/components/ui/StatusLabel";
+import { getHackathonBySlugWithSources, getVerifiedHackathons } from "../../../lib/services/supabase-db";
+import { getAllHackathons } from "../../../lib/services/hackathons";
+import { Button } from "../../../components/ui/Button";
+import { StatusLabel } from "../../../components/ui/StatusLabel";
+import { SaveEventButton } from "../../../components/hackathons/SaveEventButton";
+import { cn } from "../../../lib/utils";
 import {
   Calendar,
   MapPin,
@@ -17,10 +20,11 @@ import {
   CheckCircle2,
   FileText,
   AlertCircle,
-  Share2,
+  GraduationCap,
+  UserCheck,
 } from "lucide-react";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   const hackathons = getAllHackathons();
   return hackathons.map((h) => ({
     slug: h.slug,
@@ -33,11 +37,13 @@ interface PageProps {
 
 export default async function HackathonDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const hackathon = getHackathonBySlug(slug);
+  const result = await getHackathonBySlugWithSources(slug);
 
-  if (!hackathon) {
+  if (!result || !result.hackathon) {
     notFound();
   }
+
+  const { hackathon, sources, verificationLogs } = result;
 
   const formatText = {
     in_person: "In-Person (On-Campus)",
@@ -79,13 +85,7 @@ export default async function HackathonDetailPage({ params }: PageProps) {
 
           <div className="flex items-center gap-2">
             <StatusLabel
-              type={
-                hackathon.registrationStatus === "open"
-                  ? "reg_open"
-                  : hackathon.registrationStatus === "closing_soon"
-                  ? "reg_closing"
-                  : "reg_closed"
-              }
+              type={hackathon.registrationStatus}
               size="sm"
             />
           </div>
@@ -127,7 +127,18 @@ export default async function HackathonDetailPage({ params }: PageProps) {
             </span>
             <div className="flex items-center gap-1.5 font-bold text-[#B45309]">
               <Clock className="w-4 h-4 text-[#B45309]" />
-              <span>{hackathon.registrationDeadline}</span>
+              <div className="min-w-0">
+                <span>
+                  {hackathon.registrationStatus === "deadline_today"
+                    ? (hackathon.isDateOnlyDeadline ? "Closes Today (IST)" : hackathon.registrationDeadline)
+                    : hackathon.registrationDeadline}
+                </span>
+                {hackathon.isDateOnlyDeadline && (
+                  <span className="block text-[10px] font-normal text-[#64748B]">
+                    Date-only deadline (Asia/Kolkata)
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -179,6 +190,7 @@ export default async function HackathonDetailPage({ params }: PageProps) {
                 </Button>
               </a>
             )}
+            <SaveEventButton hackathonId={hackathon.id} size="md" />
           </div>
 
           <div className="flex items-center gap-2 text-xs text-[#64748B]">
@@ -246,6 +258,53 @@ export default async function HackathonDetailPage({ params }: PageProps) {
             </div>
           )}
 
+          {/* Eligibility & Team Participation Guidelines */}
+          <div className="bg-white rounded-md border border-[#E2E8F0] p-6 shadow-xs space-y-4">
+            <h2 className="text-base font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-[#2563EB]" />
+              <span>Eligibility & Team Requirements</span>
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block">
+                  Eligible Participants
+                </span>
+                <p className="font-medium text-[#0F172A] leading-relaxed">
+                  {hackathon.eligibility || "Open to all students across Karnataka engineering, polytechnic, and university campuses."}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block">
+                  Team Formation Rules
+                </span>
+                <p className="font-medium text-[#0F172A] leading-relaxed">
+                  {hackathon.teamSize}
+                  {hackathon.teamSizeMin && hackathon.teamSizeMin <= 1 ? " (Solo participation permitted)" : " (Team submission only)"}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block">
+                  Registration Fee
+                </span>
+                <p className="font-medium text-[#0F172A]">
+                  {hackathon.isFree ? "100% Free Entry (No fees for verified student teams)" : hackathon.feeAmount || `₹${hackathon.registrationFeeInr} / Team`}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block">
+                  Verified Prize Pool
+                </span>
+                <p className="font-semibold text-[#16805D]">
+                  {hackathon.prizePool} {hackathon.prizePoolInr ? `(₹${hackathon.prizePoolInr.toLocaleString("en-IN")})` : ""}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Venue & Location */}
           <div className="bg-white rounded-md border border-[#E2E8F0] p-6 shadow-xs space-y-2">
             <h2 className="text-base font-bold text-[#0F172A] tracking-tight">
@@ -255,7 +314,7 @@ export default async function HackathonDetailPage({ params }: PageProps) {
               <MapPin className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-[#0F172A]">{formatText}</p>
-                <p className="text-[#64748B] mt-0.5">{hackathon.venue}</p>
+                <p className="text-[#64748B] mt-0.5">{hackathon.venue || "Campus details provided upon team confirmation"}</p>
               </div>
             </div>
           </div>
@@ -263,45 +322,97 @@ export default async function HackathonDetailPage({ params }: PageProps) {
 
         {/* Right Column: Transparent Verification Audit Trail */}
         <div className="space-y-6">
-          <div className="bg-white rounded-md border border-[#A7F3D0] p-5 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#16805D]">
-              <ShieldCheck className="w-4 h-4 text-[#16805D]" />
-              <span>Moderator Verification</span>
+          <div className="bg-white rounded-md border border-[#E2E8F0] p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#142D4E]">
+                <ShieldCheck className="w-4 h-4 text-[#16805D]" />
+                <span>Verification Dossier</span>
+              </div>
+              <StatusLabel type={hackathon.registrationStatus} size="xs" />
             </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between py-1.5 border-b border-[#F1F5F9]">
-                <span className="text-[#64748B]">Status:</span>
-                <span className="font-bold text-[#16805D] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Legitimate
-                </span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 border-b border-[#F1F5F9]">
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between py-1 border-b border-[#F1F5F9]">
                 <span className="text-[#64748B]">Last Audit:</span>
                 <span className="font-medium text-[#0F172A]">{hackathon.verifiedAt}</span>
               </div>
-              <div className="flex items-center justify-between py-1.5 border-b border-[#F1F5F9]">
+
+              <div className="flex items-center justify-between py-1 border-b border-[#F1F5F9]">
+                <span className="text-[#64748B]">Timezone Engine:</span>
+                <span className="font-medium text-[#0F172A]">Asia/Kolkata (IST +05:30)</span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-[#F1F5F9]">
                 <span className="text-[#64748B]">District:</span>
                 <span className="font-medium text-[#0F172A]">{hackathon.districtName}</span>
               </div>
-              <div className="flex items-center justify-between py-1.5">
+
+              <div className="flex items-center justify-between py-1 border-b border-[#F1F5F9]">
                 <span className="text-[#64748B]">Link Health:</span>
-                <span className="font-medium text-[#16805D]">200 OK (Live)</span>
+                <span className={cn(
+                  "font-medium",
+                  hackathon.registrationStatus === "unverified"
+                    ? "text-[#DC2626]"
+                    : "text-[#16805D]"
+                )}>
+                  {hackathon.registrationStatus === "unverified"
+                    ? "Unreachable / HTTP Error"
+                    : "200 OK (Authoritative)"}
+                </span>
               </div>
+
+              {hackathon.verificationNotes && (
+                <div className="py-1 border-b border-[#F1F5F9]">
+                  <span className="text-[#64748B] block mb-0.5">Audit Note:</span>
+                  <span className="text-[#334155] italic text-[11px] leading-relaxed">
+                    {hackathon.verificationNotes}
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="pt-3 border-t border-[#F1F5F9]">
+            <div className="pt-2 border-t border-[#F1F5F9]">
               <a
-                href={hackathon.sourceProofUrl}
+                href={hackathon.sourceProofUrl || hackathon.registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-[#2563EB] hover:text-[#1D4ED8] underline underline-offset-2 flex items-center gap-1 font-medium"
               >
-                <span>Inspect Source Proof URL</span>
+                <span>Inspect Authoritative Source Evidence</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
+
+          {/* Verification Audit History */}
+          {verificationLogs && verificationLogs.length > 0 && (
+            <div className="bg-white rounded-md border border-[#E2E8F0] p-4 shadow-xs space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#142D4E]">
+                <Clock className="w-3.5 h-3.5 text-[#2563EB]" />
+                <span>Verification Audit History</span>
+              </div>
+              <div className="space-y-2 text-[11px]">
+                {verificationLogs.slice(0, 3).map((log: any, idx: number) => (
+                  <div key={idx} className="p-2.5 rounded bg-[#F8FAFC] border border-[#F1F5F9] space-y-1">
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      <span className="font-semibold text-[#334155] capitalize">
+                        {String(log.verification_check_type || "Audit").replace(/_/g, " ")}
+                      </span>
+                      <span>
+                        {new Date(log.created_at).toLocaleDateString("en-IN", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-[#475569] leading-relaxed">{log.notes}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Report inaccuracy card */}
           <div className="bg-[#F8FAFC] rounded-md border border-[#E2E8F0] p-4 text-xs space-y-2">

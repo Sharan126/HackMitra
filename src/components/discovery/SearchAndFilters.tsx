@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Button } from "../ui/Button";
@@ -11,7 +11,7 @@ import {
   Sparkles,
   Filter,
 } from "lucide-react";
-import { KARNATAKA_DISTRICTS, REGIONAL_CLUSTERS } from "@/lib/karnataka-data";
+import { KARNATAKA_DISTRICTS, REGIONAL_CLUSTERS, District } from "../../lib/karnataka-data";
 
 export interface FilterState {
   search: string;
@@ -67,7 +67,7 @@ export function SearchAndFilters({
           <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
           <span>Clusters:</span>
         </span>
-        {REGIONAL_CLUSTERS.map((cluster) => {
+        {REGIONAL_CLUSTERS.map((cluster: string) => {
           const isActive = filters.cluster === cluster;
           return (
             <button
@@ -142,8 +142,8 @@ export function SearchAndFilters({
           >
             <option value="all">All 31 Districts</option>
             <optgroup label="Bengaluru Division">
-              {KARNATAKA_DISTRICTS.filter((d) => d.division === "Bengaluru").map(
-                (d) => (
+              {KARNATAKA_DISTRICTS.filter((d: District) => d.division === "Bengaluru").map(
+                (d: District) => (
                   <option key={d.id} value={d.id}>
                     {d.name} ({d.kannadaName})
                   </option>
@@ -151,8 +151,8 @@ export function SearchAndFilters({
               )}
             </optgroup>
             <optgroup label="Mysuru Division">
-              {KARNATAKA_DISTRICTS.filter((d) => d.division === "Mysuru").map(
-                (d) => (
+              {KARNATAKA_DISTRICTS.filter((d: District) => d.division === "Mysuru").map(
+                (d: District) => (
                   <option key={d.id} value={d.id}>
                     {d.name} ({d.kannadaName})
                   </option>
@@ -160,8 +160,8 @@ export function SearchAndFilters({
               )}
             </optgroup>
             <optgroup label="Belagavi Division">
-              {KARNATAKA_DISTRICTS.filter((d) => d.division === "Belagavi").map(
-                (d) => (
+              {KARNATAKA_DISTRICTS.filter((d: District) => d.division === "Belagavi").map(
+                (d: District) => (
                   <option key={d.id} value={d.id}>
                     {d.name} ({d.kannadaName})
                   </option>
@@ -169,8 +169,8 @@ export function SearchAndFilters({
               )}
             </optgroup>
             <optgroup label="Kalaburagi Division (Kalyana Karnataka)">
-              {KARNATAKA_DISTRICTS.filter((d) => d.division === "Kalaburagi").map(
-                (d) => (
+              {KARNATAKA_DISTRICTS.filter((d: District) => d.division === "Kalaburagi").map(
+                (d: District) => (
                   <option key={d.id} value={d.id}>
                     {d.name} ({d.kannadaName})
                   </option>
@@ -225,7 +225,7 @@ export function SearchAndFilters({
               leftIcon={<MapPin className="w-4 h-4 text-[#64748B]" />}
             >
               <option value="all">All 31 Districts</option>
-              {KARNATAKA_DISTRICTS.map((d) => (
+              {KARNATAKA_DISTRICTS.map((d: District) => (
                 <option key={d.id} value={d.id}>
                   {d.name} ({d.kannadaName})
                 </option>

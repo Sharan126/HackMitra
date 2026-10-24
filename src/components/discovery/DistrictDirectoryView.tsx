@@ -3,8 +3,8 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { DistrictSummary } from "@/types/hackathon";
-import { StatewideDistrictStats } from "@/lib/services/districts";
+import { DistrictSummary } from "../../types/hackathon";
+import { StatewideDistrictStats } from "../../lib/services/districts";
 import {
   Search,
   MapPin,

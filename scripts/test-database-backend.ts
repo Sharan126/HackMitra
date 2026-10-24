@@ -117,13 +117,22 @@ try {
 assert(threwOnClient, "assertServerOnly() reliably blocks client-side execution");
 
 // -----------------------------------------------------------------------------
-// Test 3: Graceful Client Initialization
+// Test 3: Graceful Client Initialization Fallback
 // -----------------------------------------------------------------------------
+const oldUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const oldServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 const browserClient = createBrowserSupabaseClient();
 assert(browserClient === null, "Browser client returns null safely when credentials not yet set");
 
 const adminClient = createAdminSupabaseClient();
 assert(adminClient === null, "Admin client returns null safely when service key not yet set");
+
+process.env.NEXT_PUBLIC_SUPABASE_URL = oldUrl;
+process.env.SUPABASE_SERVICE_ROLE_KEY = oldServiceKey;
 
 // -----------------------------------------------------------------------------
 // Test 4: Database Access Layer Fallback & Availability

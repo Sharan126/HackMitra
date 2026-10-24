@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
-import { getAllDistrictSummaries, getStatewideDistrictStats } from "@/lib/services/districts";
-import { DistrictDirectoryView } from "@/components/discovery/DistrictDirectoryView";
+import { getAllDistrictSummaries, getStatewideDistrictStats } from "../../lib/services/districts";
+import { DistrictDirectoryView } from "../../components/discovery/DistrictDirectoryView";
 
 export const metadata: Metadata = {
   title: "All 31 Karnataka Districts | Statewide Hackathon Directory",
